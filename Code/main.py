@@ -15,3 +15,8 @@ def main():
 
         if evento == "verde1":
             verde1_RGB()
+
+        resgate = resgate()
+
+        if resgate == "resgate1" and "resgate2":
+            middle()
