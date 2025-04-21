@@ -24,34 +24,6 @@ def gyro_straight():
 
         robot.drive(30, turn)
 
-def fw_10():
-    while True:
-        ref = 10 
-        error = gyro.angle() - ref
-        P = error * kp
-        integral += error
-        I = integral * ki
-        D = (error - last_error)* kd
-        turn = P + I + D 
-        
-        last_error = error #atualiza o erro
-
-        robot.drive(30, turn)
-
-def fw_10neg():
-    while True:
-        ref = -10 
-        error = gyro.angle() - ref
-        P = error * kp
-        integral += error
-        I = integral * ki
-        D = (error - last_error)* kd
-        turn = P + I + D 
-        
-        last_error = error #atualiza o erro
-
-        robot.drive(30, turn)
-
 KP = -0.6
 KI = -0.01
 KD = -4
