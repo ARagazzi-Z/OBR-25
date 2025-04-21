@@ -11,7 +11,7 @@ ev3 = EV3Brick()
 lm = Motor(Port.A) # motor da roda da esquerda
 rm = Motor(Port.B) # motor da roda da direita
 sm = Motor(Port.C) # motor do sensor
-cm = Motor(Port.D) # motor da caixa
+cm = Motor(Port.D) # motor da portão da caixa
 
 gyro = GyroSensor(Port.S1)
 ultras = UltrasonicSensor(Port.S2)

@@ -1,17 +1,16 @@
 from imports import *
 
 
-kp = -1.7
-ki = 0.01
-kd = -10
-
-integral = 0
-last_error = 0
-
-
 # ref é a referência, o valor que quer chegar
 # A EQUAÇÃO: Erro = [leitura do sensor] - [ref] 
 def gyro_straight():
+        
+    kp = -1.7
+    ki = 0.01
+    kd = -10
+
+    integral = 0
+    last_error = 0
     while True:
         ref = 0 # andar reto
         error = gyro.angle() - ref
@@ -59,20 +58,16 @@ KD = -4
 integral = 0
 last_error = 0
 
-
-
-# ref é a referência, o valor que quer chegar
-# A EQUAÇÃO: Erro = [leitura do sensor] - [ref] 
-def gyro_90():  
+def gyro_180():  
     while True:
-        ref = 90 
+        ref = 180
         error = gyro.angle() - ref
         P = error * KP
         integral += error
         I = integral * KI
         D = (error - last_error)* KD
         turn = P + I + D 
-        
+            
         lturn = turn * 1
         rturn = turn * -1
         last_error = error #atualiza o erro
@@ -89,16 +84,18 @@ def gyro_90():
         lm.brake()
         rm.brake()
 
-def gyro_180():  
+# ref é a referência, o valor que quer chegar
+# A EQUAÇÃO: Erro = [leitura do sensor] - [ref] 
+def gyro_90():  
     while True:
-        ref = 180
+        ref = 90 
         error = gyro.angle() - ref
         P = error * KP
         integral += error
         I = integral * KI
         D = (error - last_error)* KD
         turn = P + I + D 
-            
+        
         lturn = turn * 1
         rturn = turn * -1
         last_error = error #atualiza o erro
@@ -209,7 +206,7 @@ def dynam_gauge():
 ref = 0 # the robot should have gone at that moment
 def static_gauge():
     drift = ref - gyro.angle()
-
+    gyro.reset_angle(drift) 
 #CALIBRAR COM ELE TOTALMENTE PARADO 
 
 #SEMPRE CALIBRAR O GYRO AO BATER EM UMA PAREDE PARA EVITAR O *DRIFT ESTÁTICO*

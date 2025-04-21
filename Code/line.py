@@ -115,16 +115,147 @@ def x_REFLEC():
             pass
 
 def obstacle():
+    robot.straight(-20)
+    gyro_90()
+    robot.straight(80)
+    gyro_90neg()
+    robot.straight(200)
+    gyro_90neg()
+    robot.straight(80)
+    gyro_90()
+    robot.straight(-50)
 
-    if ultras.distance() <= 40:
-        robot.straight(-20)
-        gyro_90()
-        robot.straight(80)
-        gyro_90neg()
-        robot.straight(200)
-        gyro_90neg()
-        robot.straight(80)
-        gyro_90()
-        robot.straight(-50)
+def line_RGB():
+    
+    kp = 0.8
+    # P (Proporcional): Multiplica o erro por kp para corrigir a direção.
+    ki = 0.01
+    # I (Integral): Acumula pequenos erros ao longo do tempo.
+    kd = 1.2
+    # D (Derivada): Reage a mudanças rápidas no erro para evitar oscilações.
 
+    last_error = 0
+    integral = 0
+
+    while True:
+    
+        # Lê os valores RGB dos sensores
+        rgb_lscor = lscor.rgb()
+        rgb_rscor = rscor.rgb()
+
+        # Calcula o erro com base no vermelho (R)
+        r_lscor,_,_ = rgb_lscor
+        r_rscor,_,_ = rgb_rscor
+        error = r_lscor - r_rscor
+
+        # Calcula o valor integral e derivada para PID
+        integral += error
+        P = error * kp
+        I = integral * ki
+        D = (error - last_error)* kd
+        turn = P + I + D 
+        
+        last_error = error #atualiza o erro
+        speed = 30 
+
+        lm.dc(speed + turn)
+        rm.dc(speed - turn)
+
+        wait(10)
+        
+        if ultras.distance() <= 50:
+            return "obstacle"
+        
+        if verde_esq_RGB(lscor) and verde_dir_RGB(rscor):
+            return "beco"
+
+        if verde_esq_RGB(lscor) != verde_dir_RGB(rscor):
+            return "verde1"
+    
+def branco_dir_RGB(rscor):
+    r, g, b = rscor.rgb()
+    media = (r + g + b) / 3
+    if media > 60:
+        return True
+    else:
+        return False
+
+def branco_esq_RGB(lscor):
+    r, g, b = lscor.rgb()
+    media = (r + g + b) / 3
+    if media > 60:
+        return True
+    else:
+       return False
+
+def preto_esq_RGB(lscor):
+    r, g, b = lscor.rgb()
+    media = (r + g + b) / 3
+    return media < 20
+            # NÃO É NECESSÁRIO USAR COMO ARGUMENTO O SENSOR NESSE CASO
+
+def preto_dir_RGB(rscor):
+    r, g, b = rscor.rgb()
+    media = (r + g + b) / 3
+    return media < 20
+            # NÃO É NECESSÁRIO USAR COMO ARGUMENTO O SENSOR NESSE CASO
+
+"""
+Função para detectar se a cor verde está presente no valor RGB fornecido.
+
+Argumento:
+    rgb: Tupla com os valores RGB lidos do sensor de cor.
+    
+Retorno:
+    True se a cor dominante for verde, False caso contrário.
+"""
+
+    # Lógica para identificar o verde:
+    # O valor de "g" (verde) deve ser maior que o de "r" (vermelho) e "b" (azul),
+    # e o valor de verde (g) deve ser suficientemente alto para garantir que é verde.
+
+
+    # Desempacota os valores RGB
+
+# Lógica para identificar o verde na esquerda:
+def verde_esq_RGB(lscor):
+
+    r, g, b = lscor.rgb()
+
+    return g > 50 and g > r + 10 and g > b + 10
+            # NÃO É NECESSÁRIO USAR COMO ARGUMENTO O SENSOR NESSE CASO
+
+# Lógica para identificar o verde na direita:
+def verde_dir_RGB(rscor):
+
+    r, g, b = rscor.rgb()
+
+    return g > 50 and g > r + 10 and g > b + 10
+            # NÃO É NECESSÁRIO USAR COMO ARGUMENTO O SENSOR NESSE CASO
+
+def beco_sem_saida(lscor, rscor):
+        robot.straight(20) #se o verde é antes ou depois da interseção
+        if preto_dir_RGB(rscor) and preto_esq_RGB(lscor):
+            gyro_180()
+            robot.straight(50)
+        else:
+            pass
+            # NÃO É NECESSÁRIO USAR COMO ARGUMENTO O SENSOR NESSE CASO
+
+def verde1_RGB():
+    verde_dir = verde_dir_RGB()
+    verde_esq = verde_esq_RGB()
+
+    robot.straight(30) # se o verde é antes ou depois da interseção
+    if preto_esq_RGB() and branco_dir_RGB(): # se o verde é na esq
+        gyro_90neg()
+    elif preto_dir_RGB() and branco_esq_RGB(): # se o verde é na dir
+        gyro_90()
+    elif preto_esq_RGB() and preto_dir_RGB(): # se é interseção de +
+        if verde_dir:
+            gyro_90()
+        elif verde_esq:
+           gyro_90()
+    else:
+        robot.straight(-30)
 
