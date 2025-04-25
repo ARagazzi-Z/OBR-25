@@ -15,9 +15,29 @@ def area_resgate():
     elif branco_dir_RGB() > rmedia > preto_dir_RGB():
         return "resgate2"
 
+def triangulos():
+    pass
+
+def saida():
+    pass
+
+def detec_parede():
+    posicao_inicial = lm.angle()  # pega o ângulo inicial do motor esquerdo
+
+    robot.straight(70)  # tenta andar pra frente
+    wait(500) 
+
+    posicao_final = lm.angle()  # pega o ângulo final
+
+    if abs(posicao_final - posicao_inicial) < 7:
+        robot.stop()
+        return True
+    else:
+        return False
+
 def vitima_morta(lscor):
     r, g, b = lscor.rgb()
-    return r < 30 and g < 30 and g < 30
+    return r < 30 and g < 30 and b < 30
 
 def vitima_viva(lscor):
     r, g, b = lscor.rgb()
@@ -31,34 +51,220 @@ def resgate():
     while count < 36:
         gyro_10()
         wait(100)
-        if ultras.distance() < 40 : # distancia para detectar a bolinha 
-            robot.straight(ultras.distance() - 50)
+        count += 1
+
+        if ultras.distance() <= 40: # distancia para detectar a bolinha 
+            distance = ultras.distance()
+            robot.straight(distance - 50)
+
+            # Verificando a vítima
             if vitima_morta():
+                # Realizando os movimentos quando a vítima é morta
                 robot.straight(-50)
                 gyro_180()
                 robot.straight(-70) # estará bem próximo da vítima
                 gyro_10()
                 robot.straight(-50)
+                robot.straight(50)
+                gyro_10neg()
+                robot.straight(distance + 30)
                 ball += 1
+                if ball == 3:
+                    break
             elif vitima_viva():
+                # Realizando os movimentos quando a vítima é viva
                 robot.straight(-50)
                 gyro_180()
                 robot.straight(-70) # estará bem próximo da vítima
                 gyro_10neg()
                 robot.straight(-50)
+                robot.straight(50)
+                gyro_10()
+                robot.straight(distance + 30)
                 ball += 1
-        
-        count += 1
-    if ball == 3:
+                if ball == 3:
+                    break
+            else: # Caso não haja vítima, retorna à posição inicial
+                robot.straight(-distance)
+                gyro_10()
+        else:
+            # Caso não detecte a bolinha na distância estabelecida, passa para o próximo movimento
+            pass    
 
-    
+    if ball == 3:
+        triangulos()
+        saida()
+    elif count == 36 and ball < 3:
+        if ultras.distance() > 45: # se for 120
+            robot.straight(35) # ficar a 40 cm da borda do de 120 (45 + 35 = 80 => 120 - 80 = 40) 
+            count = 0
+            while count < 36:
+                gyro_10()
+                wait(100)
+                count += 1
+                if ultras.distance() <= 35: # distancia para detectar a bolinha 
+                    distance = ultras.distance()
+                    robot.straight(ultras.distance() - 50)
+                    # Verificando a vítima novamente
+                    if vitima_morta():
+                        robot.straight(-50)
+                        gyro_180()
+                        robot.straight(-70) # estará bem próximo da vítima
+                        gyro_10()
+                        robot.straight(-50)
+                        robot.straight(50)
+                        gyro_10neg()
+                        robot.straight(distance + 30)
+                        ball += 1
+                        if ball == 3:
+                            break
+                    elif vitima_viva():
+                        robot.straight(-50)
+                        gyro_180()
+                        robot.straight(-70) # estará bem próximo da vítima
+                        gyro_10neg()
+                        robot.straight(-50)
+                        robot.straight(50)
+                        gyro_10()
+                        robot.straight(distance + 30)
+                        ball += 1
+                        if ball == 3:
+                            break
+                    else:
+                        robot.straight(-distance)
+                        gyro_10()
+                else:
+                    pass    
+        else:
+            gyro_90neg()
+            if ultras.distance() > 45: # se for 120
+                robot.straight(35) # ficar a 40 cm da borda do de 120 (45 + 35 = 80 => 120 - 80 = 40) 
+                count = 0
+                while count < 36:
+                    gyro_10()
+                    wait(100)
+                    count += 1
+                    if ultras.distance() <= 35: # distancia para detectar a bolinha 
+                        distance = ultras.distance()
+                        robot.straight(ultras.distance() - 50)
+                        # Verificando a vítima novamente
+                        if vitima_morta():
+                            robot.straight(-50)
+                            gyro_180()
+                            robot.straight(-70) # estará bem próximo da vítima
+                            gyro_10()
+                            robot.straight(-50)
+                            robot.straight(50)
+                            gyro_10neg()
+                            robot.straight(distance + 30)
+                            ball += 1
+                            if ball == 3:
+                                break
+                        elif vitima_viva():
+                            robot.straight(-50)
+                            gyro_180()
+                            robot.straight(-70) # estará bem próximo da vítima
+                            gyro_10neg()
+                            robot.straight(-50)
+                            robot.straight(50)
+                            gyro_10()
+                            robot.straight(distance + 30)
+                            ball += 1
+                            if ball == 3:
+                                break
+                        else:
+                            robot.straight(-distance)
+                            gyro_10()
+                    else:
+                        pass    
+
+                if ball == 3:
+                    triangulos()
+                    saida()
+                elif count == 36 and ball < 3:
+                    triangulos()
+                    saida()
+
+            else:
+                gyro_180
+                if ultras.distance() > 45: # se for 120
+                    robot.straight(35) # ficar a 40 cm da borda do de 120 (45 + 35 = 80 => 120 - 80 = 40) 
+                    count = 0
+                    while count < 36:
+                        gyro_10()
+                        wait(100)
+                        count += 1
+                        if ultras.distance() <= 35: # distancia para detectar a bolinha 
+                            distance = ultras.distance()
+                            robot.straight(ultras.distance() - 50)
+                            # Verificando a vítima novamente
+                            if vitima_morta():
+                                robot.straight(-50)
+                                gyro_180()
+                                robot.straight(-70) # estará bem próximo da vítima
+                                gyro_10()
+                                robot.straight(-50)
+                                robot.straight(50)
+                                gyro_10neg()
+                                robot.straight(distance + 30)
+                                ball += 1
+                                if ball == 3:
+                                    break
+                            elif vitima_viva():
+                                robot.straight(-50)
+                                gyro_180()
+                                robot.straight(-70) # estará bem próximo da vítima
+                                gyro_10neg()
+                                robot.straight(-50)
+                                robot.straight(50)
+                                gyro_10()
+                                robot.straight(distance + 30)
+                                ball += 1
+                                if ball == 3:
+                                    break
+                            else:
+                                robot.straight(-distance)
+                                gyro_10()
+                        else:
+                            pass    
+
+                    if ball == 3:
+                        triangulos()
+                        saida()
+                    elif count == 36 and ball < 3:
+                        triangulos()
+                        saida()
+                else:
+                    triangulos()
+                    saida()
+
+def resgate_dir():
+    if middle() == "direita":
+        pass #FAZER
 
 def middle():
     robot.straight(450)
-    gyro_90 # vira para direita
-    if ultras.distance() <= 50: # se for na direita 
+    gyro_90() # vira para direita
+    right = ultras.distance()
+    gyro_180() # vira para esquerda
+    left = ultras.distance()
+    if right < left:
+        robot.straight(left)
+        detec_parede()
+        if detec_parede():
+            robot.straight(-450)
+            cm.angle(90) # ativa o sensor de cor para vitimas
+            return "esquerda"
+        else:
+            pass
+    elif right > left:
         gyro_180()
-        robot.straight(450)
-    elif ultras.distance() >50:
-        robot.straight(450)
-        cm.angle(90) # ativa o sensor de cor para vitimas
+        robot.straight(right)
+        detec_parede()
+        if detec_parede():
+            robot.straight(-450)
+            cm.angle(90) # ativa o sensor de cor para vitimas
+            return "direita"
+        else: 
+            pass
+

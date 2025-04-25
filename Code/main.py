@@ -15,6 +15,11 @@ def main():
 
         if evento == "verde1":
             verde1_RGB()
+        
+        if evento == "TX na direita":
+            TX_dir_RGB()
+        if evento == "TX na esquerda":
+            TX_esq_RGB()
 
         resgate = resgate()
 

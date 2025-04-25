@@ -172,8 +172,11 @@ def line_RGB():
         if verde_esq_RGB(lscor) != verde_dir_RGB(rscor):
             return "verde1"
         
-        if preto_esq_RGB() or preto_dir_RGB():
-            return "TX sem verde"
+        if preto_esq_RGB() and bran():
+            return "TX na esquerda"
+
+        if preto_dir_RGB() and branco_esq_RGB():
+            return "TX na direita"
     
 def branco_dir_RGB(rscor):
     r, g, b = rscor.rgb()
@@ -262,21 +265,30 @@ def verde1_RGB():
     else:
         robot.straight(-30)
 
-def preto_TX_RGB():
-    if preto_dir_RGB() and branco_esq_RGB():
-        while not preto_esq_RGB == True:
-            gyro.reset_angle(0)
-            turn = 0
-            gyro_10
+def TX_dir_RGB():
+        turn = 0
+        gyro.reset_angle(0)
+        while not preto_esq_RGB() == True:
+            gyro_10()
             wait(10)
-            turn += gyro.angle()
+        turn = gyro.angle()
         if abs(turn) < 90:
             robot.turn(turn * (-1))
         elif abs(turn) >= 90:
-            if turn <= 0: 
-                # FAZER
-                robot.turn(turn)
-    elif preto_esq_RGB() and branco_dir_RGB():
-        while not preto_dir_RGB == True:
-            gyro_10neg
+            turn = turn - 90
+            robot.turn(turn)
+
+def TX_esq_RGB():
+    if preto_esq_RGB() and branco_dir_RGB():    
+        turn = 0
+        gyro.reset_angle(0)
+        while not preto_esq_RGB() == True:
+            gyro_10neg()
             wait(10)
+        turn = gyro.angle()
+        if abs(turn) < 90:
+            robot.turn(turn * (-1))
+        elif abs(turn) >= 90:
+            turn = abs(turn) - 90
+            robot.turn(turn)
+
