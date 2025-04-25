@@ -275,7 +275,7 @@ def preto_TX_RGB():
         elif abs(turn) >= 90:
             if turn <= 0: 
                 # FAZER
-            robot.turn(turn)
+                robot.turn(turn)
     elif preto_esq_RGB() and branco_dir_RGB():
         while not preto_dir_RGB == True:
             gyro_10neg
