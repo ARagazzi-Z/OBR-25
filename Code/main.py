@@ -21,7 +21,15 @@ def main():
         if evento == "TX na esquerda":
             TX_esq_RGB()
 
-        resgate = resgate()
+        resgate_result = area_resgate()
 
-        if resgate == "resgate1" and "resgate2":
+        if resgate_result == "resgate1" and "resgate2":
             middle()
+
+        chegada_meio = middle()
+
+        if chegada_meio == "sul":
+            resgate()
+
+        
+            

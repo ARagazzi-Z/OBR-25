@@ -172,7 +172,7 @@ def line_RGB():
         if verde_esq_RGB(lscor) != verde_dir_RGB(rscor):
             return "verde1"
         
-        if preto_esq_RGB() and bran():
+        if preto_esq_RGB() and branco_dir_RGB():
             return "TX na esquerda"
 
         if preto_dir_RGB() and branco_esq_RGB():

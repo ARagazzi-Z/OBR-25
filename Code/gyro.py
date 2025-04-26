@@ -33,6 +33,7 @@ last_error = 0
 def gyro_180():  
     while True:
         ref = 180
+        gyro.reset_angle()
         error = gyro.angle() - ref
         P = error * KP
         integral += error
@@ -61,6 +62,7 @@ def gyro_180():
 def gyro_90():  
     while True:
         ref = 90 
+        gyro.reset_angle()
         error = gyro.angle() - ref
         P = error * KP
         integral += error
@@ -87,6 +89,7 @@ def gyro_90():
 def gyro_90neg():  
     while True:
         ref = -90 
+        gyro.reset_angle()
         error = gyro.angle() - ref
         P = error * KP
         integral += error
@@ -113,6 +116,7 @@ def gyro_90neg():
 def gyro_10neg():  
     while True:
         ref = -10
+        gyro.reset_angle()
         error = gyro.angle() - ref
         P = error * KP
         integral += error
@@ -139,6 +143,7 @@ def gyro_10neg():
 def gyro_10():  
     while True:
         ref = 10
+        gyro.reset_angle()
         error = gyro.angle() - ref
         P = error * KP
         integral += error
