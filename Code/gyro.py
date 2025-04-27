@@ -167,6 +167,31 @@ def gyro_10():
         lm.brake()
         rm.brake()
 
+def gyro_turn(ref):  
+    while True:
+        gyro.reset_angle()
+        error = gyro.angle() - ref
+        P = error * KP
+        integral += error
+        I = integral * KI
+        D = (error - last_error)* KD
+        turn = P + I + D 
+        
+        lturn = turn * 1
+        rturn = turn * -1
+        last_error = error #atualiza o erro
+
+        ref = abs(ref) # tornando a referencia um numero absoluto 
+        # tornando o angulo lido pelo gyro um numero absoluto
+        # isso torna mais fácil a certificação.
+
+        while not abs(gyro.angle())>= ref:
+            robot.stop() # para permitir que os motores atuem separadamente
+            lm.run(lturn)
+            rm.run(rturn)
+        robot.stop()
+        lm.brake()
+        rm.brake()
 
 #CALIBRATION OF THE GYRO TO PREVENT DYNAMIC DRIFT
 #Change from speed() (deg/sec) to angle() (deg) or from angle to speed.

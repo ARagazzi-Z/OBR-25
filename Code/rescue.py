@@ -1,20 +1,22 @@
 from imports import *
 from gyro import *
 from line import branco_dir_RGB, branco_esq_RGB, verde_dir_RGB, verde_esq_RGB, preto_dir_RGB, preto_esq_RGB
+import math
+import time
 
 posicao_inicial = 0
     
-def area_resgate():
+# Modificação na função area_resgate para gravar a posição do robô no momento da entrada
+def area_resgate(mapeador):
     lr, lg, lb = lscor.rgb()
     rr, rg, rb = rscor.rgb()
-
     lmedia = (lr + lg + lb) / 3
     rmedia = (rr + rg + rb) / 3
 
-    if branco_esq_RGB() > lmedia > preto_esq_RGB():
-        return "resgate1"
-    elif branco_dir_RGB() > rmedia > preto_dir_RGB():
-        return "resgate2"
+    if branco_esq_RGB() > lmedia > preto_esq_RGB() and branco_dir_RGB() > rmedia > preto_dir_RGB():
+        # Registra a posição atual do robô como "entrada"
+        mapeador.MAPA.append((mapeador.centro_x, mapeador.centro_y, 'entrada'))
+        return "resgate"
 
 def triangulos():
     pass
@@ -210,37 +212,159 @@ def resgate():
                     triangulos()
                     saida()
 
-def middle():
-    robot.straight(450)
-    gyro_90() # vira para direita
-    right = ultras.distance()
-    gyro_180() # vira para esquerda
-    left = ultras.distance()
-    gyro.reset_angle() # reseta o ângulo do giroscópio
-    if right < left:
-        robot.straight(left)
-        if detec_parede():
-            robot.straight(-450)
-            sm.angle(90) # ativa o sensor de cor para vitimas
-            return "sul"
+def middle(mapeador):
+    if area_resgate(mapeador) == "resgate":
+        largura = ultras.distance() 
+        if largura >= 910:  
+            largura = 1200 
+        elif largura < 910:
+            largura = 900
+
+        robot.straight(largura/2)
+        gyro_turn(90) # virou para a direita para ver se tem parede
+        if ultras.distance() < 50:
+            gyro_turn(180)
+            if largura == 1200:
+                altura = 900
+                robot.straight(altura/2) 
+
+
+    # Simulação do deslocamento do robô da entrada até o centro
+    deslocamento_x = 50   # distância percorrida em x (exemplo)
+    deslocamento_y = 30   # distância percorrida em y (exemplo)
+    
+    # Calcula a nova posição (antes do ajuste) – essa é a posição atual do robô
+    nova_pos_x = mapeador.centro_x + deslocamento_x
+    nova_pos_y = mapeador.centro_y + deslocamento_y
+    
+    # Reescreve todas as coordenadas do mapa para que o novo centro seja (0, 0)
+    nova_mapa = []
+    for (x, y, tipo) in mapeador.MAPA:
+         nova_mapa.append((x - nova_pos_x, y - nova_pos_y, tipo))
+    mapeador.MAPA = nova_mapa
+
+    # Define o novo centro como (0,0)
+    mapeador.centro_x = 0
+    mapeador.centro_y = 0
+
+    # Agora, o ponto de entrada estará reescrito relativo ao novo centro;
+    # por exemplo, se a entrada foi registrada originalmente em (0,0),
+    # ela será atualizada para (-deslocamento_x, -deslocamento_y)
+    print(f"Novo centro definido: (0,0). Entrada atualizada: ({-nova_pos_x}, {-nova_pos_y})")
+    return "sul"
+
+
+class Mapeador:
+    def __init__(self, largura = 0, altura = 0, escala=10):
+        self.largura = largura
+        self.altura = altura
+        self.escala = escala
+        self.centro_x = 0
+        self.centro_y = 0
+        self.MAPA = []
+        self.MARGEM_ERRO = 5
+
+    # Distância esperada até a parede em um certo ângulo
+    def dist_esperada(self, angulo_rad):
+        dx = math.cos(angulo_rad)
+        dy = math.sin(angulo_rad)
+
+        if dx == 0:
+            dx = 1e-6
+        if dy == 0:
+            dy = 1e-6
+
+        if dx > 0:
+            distancia_x = (self.largura/2 - self.centro_x) / dx
         else:
-            robot.straight(-450)
-            sm.angle(90) # ativa o sensor de cor para vitimas
-            return "sul"
-    elif right > left:
-        gyro_180()
-        gyro.reset_angle() # reseta o ângulo do giroscópio
-        robot.straight(right)
-        if detec_parede():
-            robot.straight(-450)
-            sm.angle(90) # ativa o sensor de cor para vitimas
-            return "sul"
-        else: 
-            robot.straight(-450)
-            sm.angle(90) # ativa o sensor de cor para vitimas
-            return "sul"
-    else:
-        sm.angle(90)
-        return "sul"
+            distancia_x = (-self.largura/2 - self.centro_x) / dx
+
+        if dy > 0:
+            distancia_y = (self.altura/2 - self.centro_y) / dy
+        else:
+            distancia_y = (-self.altura/2 - self.centro_y) / dy
+
+        return min(distancia_x, distancia_y)
+
+    def radar(self):
+        # Função principal para fazer o mapeamento
+        for angulo in range(0, 360, 20):  # varre de 20 em 20 graus
+            # Gira o robô e mede a distância
+            gyro_turn(20) # -> Aqui giraria fisicamente
+            time.sleep(0.1)  # pequena pausa para estabilizar
+            distancia_real = self.medir_distancia()  # você implementa sua função de medir
+
+            angulo_rad = math.radians(angulo)
+            distancia_teorica = self.dist_esperada(angulo_rad) # calcula a distância esperada até a parede da localidade 
+
+            # Decide o que é o objeto
+            if distancia_real < distancia_teorica - self.MARGEM_ERRO:
+                tipo = 'bolinha'
+            elif distancia_real > distancia_teorica + self.MARGEM_ERRO:
+                tipo = 'saida'  # pode ser saída ou entrada
+            else:
+                tipo = 'parede'
+
+            # Calcula posição x, y do objeto detectado
+            x = self.centro_x + math.cos(angulo_rad) * distancia_real
+            y = self.centro_y + math.sin(angulo_rad) * distancia_real
+
+            self.MAPA.append((x, y, tipo))
+
+    def medir_distancia(self):
+        dist_real = ultras.distance()
+        return dist_real 
+
+    # Função para desenhar o mapa
+    def print_mapa(self):
+        grid = [['.' for _ in range(self.largura // self.escala)] for _ in range(self.altura // self.escala)]
+
+        centro_grid_x = (self.largura // self.escala) // 2
+        centro_grid_y = (self.altura // self.escala) // 2
+        grid[centro_grid_y][centro_grid_x] = 'R'  # Robô no centro
+
+        for objeto in self.MAPA:
+            x, y, tipo = objeto
+
+            pos_x = int((x + self.largura/2) // self.escala)
+            pos_y = int((self.altura/2 - y) // self.escala)
+
+            if 0 <= pos_x < (self.largura // self.escala) and 0 <= pos_y < (self.altura // self.escala):
+                if tipo == 'parede':
+                    grid[pos_y][pos_x] = '#'
+                elif tipo == 'bolinha':
+                    grid[pos_y][pos_x] = 'O'
+                elif tipo == 'saida':
+                    grid[pos_y][pos_x] = 'S'
+                elif tipo == 'entrada':
+                    grid[pos_y][pos_x] = 'E'
+
+        # Agora desenha no visor:
+        ev3.screen.clear()
+
+        tamanho_letra = 8  # cada caractere ocupa mais ou menos 8x8 pixels
+        for i, linha in enumerate(grid):
+            texto = ''.join(linha)
+            ev3.screen.draw_text(0, i * tamanho_letra, texto)
+
+    # Função para ir até uma posição 
+    def resgate_vitimas(self, x_destino, y_destino):
+        dx = x_destino - self.centro_x
+        dy = y_destino - self.centro_y
+
+        distancia = math.sqrt(dx**2 + dy**2)
+        angulo = math.degrees(math.atan2(dy, dx))
+
+        # Aqui você giraria até o ângulo certo e andaria até a distância certa
+        gyro_turn(angulo)
+        robot.straight(distancia)
+        # Simulação de movimento
+        print(f"Girando até {angulo:.2f} graus e andando {distancia:.2f} cm")
 
 
+# Exemplo de uso
+"""
+m = Mapeador()
+m.radar()
+m.print_mapa()
+"""

@@ -2,6 +2,9 @@ from imports import *
 from line import *
 from gyro import *
 from rescue import *
+from rescue import Mapeador  # importar a classe Mapeador
+
+m = Mapeador()  # instância para armazenar a posição
 
 def main():
     while True:
@@ -21,9 +24,9 @@ def main():
         if evento == "TX na esquerda":
             TX_esq_RGB()
 
-        resgate_result = area_resgate()
+        resgate_result = area_resgate(m)  # passa a instância mapeador
 
-        if resgate_result == "resgate1" and "resgate2":
+        if resgate_result == "resgate":
             middle()
 
         chegada_meio = middle()
@@ -31,5 +34,4 @@ def main():
         if chegada_meio == "sul":
             resgate()
 
-        
-            
+
