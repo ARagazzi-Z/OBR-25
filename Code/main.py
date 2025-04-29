@@ -21,17 +21,36 @@ def main():
         
         if evento == "TX na direita":
             TX_dir_RGB()
+
         if evento == "TX na esquerda":
             TX_esq_RGB()
+
+        if evento == "X sem verde":
+            X_preto_RGB()
 
         resgate_result = area_resgate(m)  # passa a instância mapeador
 
         if resgate_result == "resgate":
             middle()
 
-        chegada_meio = middle()
+        m = Mapeador
 
-        if chegada_meio == "sul":
-            resgate()
+        if middle() == "radar":
+            m.radar()
 
+        if m.radar() == 'detecção das vitimas':
+            m.condensar_objeto()
 
+        if m.condensar_objeto() == 'resgate das vitimas':
+            m.resgatar_vitima()
+
+        if m.resgatar_vitima() == 'resgate das vitimas concluído':
+            triangulos()
+
+        if triangulos() == 'sair':
+            saida()
+
+        if saida() == 'saida com sucesso':
+            print("Saída com sucesso!")
+            
+        

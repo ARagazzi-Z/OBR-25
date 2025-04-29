@@ -177,6 +177,9 @@ def line_RGB():
 
         if preto_dir_RGB() and branco_esq_RGB():
             return "TX na direita"
+        
+        if preto_esq_RGB() and preto_dir_RGB():
+            return "X sem verde"
     
 def branco_dir_RGB(rscor):
     r, g, b = rscor.rgb()
@@ -292,3 +295,6 @@ def TX_esq_RGB():
             turn = abs(turn) - 90
             robot.turn(turn)
 
+def X_preto_RGB():
+    if preto_esq_RGB() and preto_dir_RGB():
+        robot.straight(30)
